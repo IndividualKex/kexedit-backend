@@ -1,43 +1,33 @@
-# Rust Workspace
+# Rust Backend (Submodule)
 
-Portable physics/math core implementation for KexEdit.
+Git submodule → [kexedit-backend](https://github.com/IndividualKex/kexedit-backend)
 
 ## Purpose
 
-High-performance Rust implementation of Core domain logic, designed for portability (native, WASM) and FFI integration with Unity C#.
+Standalone Rust workspace for FVD physics computation. Consumed by KexEdit via C FFI.
 
 ## Layout
 
 ```
-rust-backend/
-├── kexedit-core/    # Pure domain layer (physics/math primitives)
-├── kexedit-nodes/   # Node schema + implementations
-├── kexedit-ffi/     # FFI adapter for Unity C# interop
-├── Cargo.toml       # Workspace manifest
-├── build.sh         # Build script
-└── context.md
+rust-backend/  # Git submodule
+├── kexedit-core/    # Pure domain layer (physics/math)
+├── kexedit-nodes/   # Node-based track construction
+├── kexedit-ffi/     # C FFI adapter
+└── Cargo.toml       # Workspace manifest
 ```
 
 ## Commands
 
 ```bash
-# Build all
-cargo build --release
+# Test Rust workspace
+cd rust-backend && cargo test
 
-# Test all
-cargo test
-
-# Build FFI for Unity
-cargo build --release -p kexedit-ffi
-# Output: target/release/kexedit_core.{dll,dylib,so}
+# Build for Unity (from KexEdit root)
+./build-rust.sh
 ```
 
 ## Architecture
 
-- **kexedit-core**: Pure Rust domain logic (76 tests)
-- **kexedit-nodes**: Node schema + all 8 implementations (39 tests)
-- **kexedit-ffi**: C FFI adapter (2 tests)
+Layered library: Core (domain) → Nodes (construction) → FFI (C adapter)
 
-## Dependencies
-
-None for runtime. Test dependencies: `approx`.
+See [kexedit-backend repository](https://github.com/IndividualKex/kexedit-backend) for full documentation.
