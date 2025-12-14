@@ -1,10 +1,14 @@
 # AI Context - Working Agreement
 
 <project-description>
-[Short high-level description of the project - MUST be filled during /plant initialization]
+Standalone Rust library for Force Vector Design (FVD) physics computation and roller coaster track generation. Pure domain logic with optional C FFI adapter for integration with external consumers.
 </project-description>
 
 **Required**: Read [layers/structure.md](layers/structure.md) before proceeding with any task
+
+## Testing
+
+**Unit tests**: `cargo test`
 
 ## Context Management System
 
