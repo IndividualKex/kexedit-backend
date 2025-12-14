@@ -1,6 +1,4 @@
-use kexedit_core::{
-    sim, Curvature, Forces, Frame, Keyframe, PhysicsParams, Point,
-};
+use kexedit_core::{sim, Curvature, Forces, Frame, Keyframe, PhysicsParams, Point};
 
 use crate::{DurationType, IterationConfig};
 
@@ -13,7 +11,8 @@ fn step_by_forces(
     velocity: f32,
     spine_advance: f32,
 ) -> Frame {
-    let force_vec = prev.normal * (-normal_force) + prev.lateral * (-lateral_force)
+    let force_vec = prev.normal * (-normal_force)
+        + prev.lateral * (-lateral_force)
         + kexedit_core::Float3::new(0.0, -1.0, 0.0);
     let normal_accel = -force_vec.dot(prev.normal) * sim::G;
     let lateral_accel = -force_vec.dot(prev.lateral) * sim::G;
@@ -74,18 +73,18 @@ pub fn advance(
     let prev_heart_pos = prev.heart_position(physics.heart_offset);
     let curr_heart_pos_if_spine_static = prev.spine_position + curr_normal * physics.heart_offset;
 
-    let mut curr_spine_position = prev.spine_position;
-    curr_spine_position = curr_spine_position
-        + curr_direction * half_step_distance
+    let displacement = curr_direction * half_step_distance
         + prev.direction * half_step_distance
         + (prev_heart_pos - curr_heart_pos_if_spine_static);
+    let curr_spine_position = prev.spine_position + displacement;
 
     let rolled_frame = new_frame.with_roll(physics.delta_roll);
     let curr_lateral = rolled_frame.lateral;
     curr_normal = rolled_frame.normal;
 
     let heart_advance = ((curr_spine_position + curr_normal * physics.heart_offset)
-        - prev.heart_position(physics.heart_offset)).magnitude();
+        - prev.heart_position(physics.heart_offset))
+    .magnitude();
     let new_heart_arc = prev.heart_arc + heart_advance;
     let spine_advance = (curr_spine_position - prev.spine_position).magnitude();
     let new_spine_arc = prev.spine_arc + spine_advance;
@@ -225,7 +224,8 @@ fn build_time_section(
             prev = prev.with_velocity(velocity, prev_heart_offset, prev_friction, true);
         } else if prev.velocity < sim::MIN_VELOCITY {
             if prev.frame().pitch() < 0.0 {
-                prev = prev.with_velocity(sim::MIN_VELOCITY, prev_heart_offset, prev_friction, true);
+                prev =
+                    prev.with_velocity(sim::MIN_VELOCITY, prev_heart_offset, prev_friction, true);
             } else {
                 break;
             }
@@ -247,7 +247,13 @@ fn build_time_section(
             delta_roll,
             driven,
         );
-        let curr = advance(&prev, target_normal_force, target_lateral_force, &physics, roll_speed_val);
+        let curr = advance(
+            &prev,
+            target_normal_force,
+            target_lateral_force,
+            &physics,
+            roll_speed_val,
+        );
 
         result.push(curr);
         *state = curr;
@@ -297,7 +303,8 @@ fn build_distance_section(
             prev = prev.with_velocity(velocity, prev_heart_offset, prev_friction, true);
         } else if prev.velocity < sim::MIN_VELOCITY {
             if prev.frame().pitch() < 0.0 {
-                prev = prev.with_velocity(sim::MIN_VELOCITY, prev_heart_offset, prev_friction, true);
+                prev =
+                    prev.with_velocity(sim::MIN_VELOCITY, prev_heart_offset, prev_friction, true);
             } else {
                 break;
             }
@@ -319,7 +326,13 @@ fn build_distance_section(
             delta_roll,
             driven,
         );
-        let curr = advance(&prev, target_normal_force, target_lateral_force, &physics, roll_speed_val);
+        let curr = advance(
+            &prev,
+            target_normal_force,
+            target_lateral_force,
+            &physics,
+            roll_speed_val,
+        );
 
         result.push(curr);
         *state = curr;
@@ -452,10 +465,7 @@ mod tests {
         fn build_from_gold_section(section: &crate::golden::GoldSection) -> Vec<Point> {
             let anchor = section.inputs.anchor.to_point();
             let duration = section.inputs.duration.as_ref().unwrap();
-            let config = IterationConfig::new(
-                duration.value,
-                duration.to_duration_type(),
-            );
+            let config = IterationConfig::new(duration.value, duration.to_duration_type());
             let keyframes = section.inputs.keyframes.as_ref();
             let overrides = section.inputs.property_overrides.as_ref();
 
@@ -503,7 +513,10 @@ mod tests {
             let data = GoldTrackData::load("../test-data/shuttle.json")
                 .expect("Failed to load shuttle.json");
             let sections = data.get_force_sections();
-            assert!(!sections.is_empty(), "No force sections found in shuttle.json");
+            assert!(
+                !sections.is_empty(),
+                "No force sections found in shuttle.json"
+            );
 
             let section = sections[0];
             let result = build_from_gold_section(section);
@@ -516,7 +529,10 @@ mod tests {
             let data = GoldTrackData::load("../test-data/veloci.json")
                 .expect("Failed to load veloci.json");
             let sections = data.get_force_sections();
-            assert!(sections.len() >= 1, "Expected at least 1 force section in veloci.json");
+            assert!(
+                sections.len() >= 1,
+                "Expected at least 1 force section in veloci.json"
+            );
 
             let section = sections[0];
             let result = build_from_gold_section(section);
@@ -529,7 +545,10 @@ mod tests {
             let data = GoldTrackData::load("../test-data/veloci.json")
                 .expect("Failed to load veloci.json");
             let sections = data.get_force_sections();
-            assert!(sections.len() >= 2, "Expected at least 2 force sections in veloci.json");
+            assert!(
+                sections.len() >= 2,
+                "Expected at least 2 force sections in veloci.json"
+            );
 
             let section = sections[1];
             let result = build_from_gold_section(section);

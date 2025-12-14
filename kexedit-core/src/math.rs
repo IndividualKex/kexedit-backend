@@ -156,4 +156,22 @@ mod tests {
         assert_relative_eq!(rotated.y, 0.0, epsilon = 1e-6);
         assert_relative_eq!(rotated.z, -1.0, epsilon = 1e-6);
     }
+
+    #[test]
+    fn test_quaternion_multiplication_order() {
+        use std::f32::consts::PI;
+        let q_yaw = Quaternion::from_axis_angle(Float3::UP, PI / 4.0);
+        let q_pitch = Quaternion::from_axis_angle(Float3::RIGHT, PI / 6.0);
+
+        let q_combined = q_yaw.mul(q_pitch);
+
+        let v = Float3::BACK;
+        let result_combined = q_combined.mul_vec(v);
+
+        let result_sequential = q_yaw.mul_vec(q_pitch.mul_vec(v));
+
+        assert_relative_eq!(result_combined.x, result_sequential.x, epsilon = 1e-6);
+        assert_relative_eq!(result_combined.y, result_sequential.y, epsilon = 1e-6);
+        assert_relative_eq!(result_combined.z, result_sequential.z, epsilon = 1e-6);
+    }
 }
