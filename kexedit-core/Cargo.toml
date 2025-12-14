@@ -1,0 +1,14 @@
+[package]
+name = "kexedit-core"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["rlib"]
+
+[dependencies]
+
+[dev-dependencies]
+approx = "0.5"
