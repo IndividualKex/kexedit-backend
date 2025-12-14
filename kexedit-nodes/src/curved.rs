@@ -397,7 +397,7 @@ mod tests {
 
         #[test]
         fn veloci_curved_section1_matches_gold() {
-            let data = GoldTrackData::load("../../Assets/Tests/TrackData/veloci.json")
+            let data = GoldTrackData::load("../test-data/veloci.json")
                 .expect("Failed to load veloci.json");
             let sections = data.get_curved_sections();
             assert!(!sections.is_empty(), "No curved sections found in veloci.json");

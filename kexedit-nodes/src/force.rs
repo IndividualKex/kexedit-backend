@@ -500,7 +500,7 @@ mod tests {
 
         #[test]
         fn shuttle_force_section_matches_gold() {
-            let data = GoldTrackData::load("../../Assets/Tests/TrackData/shuttle.json")
+            let data = GoldTrackData::load("../test-data/shuttle.json")
                 .expect("Failed to load shuttle.json");
             let sections = data.get_force_sections();
             assert!(!sections.is_empty(), "No force sections found in shuttle.json");
@@ -513,7 +513,7 @@ mod tests {
 
         #[test]
         fn veloci_force_section1_matches_gold() {
-            let data = GoldTrackData::load("../../Assets/Tests/TrackData/veloci.json")
+            let data = GoldTrackData::load("../test-data/veloci.json")
                 .expect("Failed to load veloci.json");
             let sections = data.get_force_sections();
             assert!(sections.len() >= 1, "Expected at least 1 force section in veloci.json");
@@ -526,7 +526,7 @@ mod tests {
 
         #[test]
         fn veloci_force_section2_matches_gold() {
-            let data = GoldTrackData::load("../../Assets/Tests/TrackData/veloci.json")
+            let data = GoldTrackData::load("../test-data/veloci.json")
                 .expect("Failed to load veloci.json");
             let sections = data.get_force_sections();
             assert!(sections.len() >= 2, "Expected at least 2 force sections in veloci.json");

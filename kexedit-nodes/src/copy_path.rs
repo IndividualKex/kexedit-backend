@@ -475,7 +475,7 @@ mod tests {
 
         #[test]
         fn all_types_copy_path_section1_matches_gold() {
-            let data = GoldTrackData::load("../../Assets/Tests/TrackData/all_types.json")
+            let data = GoldTrackData::load("../test-data/all_types.json")
                 .expect("Failed to load all_types.json");
             let sections = data.get_copy_path_sections();
 
@@ -492,7 +492,7 @@ mod tests {
 
         #[test]
         fn all_types_copy_path_section2_matches_gold() {
-            let data = GoldTrackData::load("../../Assets/Tests/TrackData/all_types.json")
+            let data = GoldTrackData::load("../test-data/all_types.json")
                 .expect("Failed to load all_types.json");
             let sections = data.get_copy_path_sections();
 
@@ -509,7 +509,7 @@ mod tests {
 
         #[test]
         fn all_types_copy_path_section3_matches_gold() {
-            let data = GoldTrackData::load("../../Assets/Tests/TrackData/all_types.json")
+            let data = GoldTrackData::load("../test-data/all_types.json")
                 .expect("Failed to load all_types.json");
             let sections = data.get_copy_path_sections();
 

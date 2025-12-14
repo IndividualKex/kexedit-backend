@@ -298,7 +298,7 @@ mod tests {
 
     #[test]
     fn test_load_shuttle_json() {
-        let path = "../../Assets/Tests/TrackData/shuttle.json";
+        let path = "../test-data/shuttle.json";
         let result = GoldTrackData::load(path);
         assert!(result.is_ok(), "Failed to load shuttle.json: {:?}", result.err());
 
@@ -309,7 +309,7 @@ mod tests {
 
     #[test]
     fn test_load_veloci_json() {
-        let path = "../../Assets/Tests/TrackData/veloci.json";
+        let path = "../test-data/veloci.json";
         let result = GoldTrackData::load(path);
         assert!(result.is_ok(), "Failed to load veloci.json: {:?}", result.err());
 
@@ -320,7 +320,7 @@ mod tests {
 
     #[test]
     fn test_filter_force_sections() {
-        let path = "../../Assets/Tests/TrackData/shuttle.json";
+        let path = "../test-data/shuttle.json";
         let data = GoldTrackData::load(path).unwrap();
         let force_sections = data.get_force_sections();
         assert!(!force_sections.is_empty());
@@ -328,7 +328,7 @@ mod tests {
 
     #[test]
     fn test_filter_geometric_sections() {
-        let path = "../../Assets/Tests/TrackData/shuttle.json";
+        let path = "../test-data/shuttle.json";
         let data = GoldTrackData::load(path).unwrap();
         let geometric_sections = data.get_geometric_sections();
         assert!(!geometric_sections.is_empty());
