@@ -38,6 +38,12 @@ impl Curvature {
     pub const ZERO: Self = Self::new(0.0, 0.0, 1.0, 0.0);
 }
 
+impl Default for Curvature {
+    fn default() -> Self {
+        Self::ZERO
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -120,7 +126,7 @@ mod tests {
     fn from_euler(pitch: f32, yaw: f32, roll: f32) -> Frame {
         let pitch_quat = crate::Quaternion::from_axis_angle(Float3::RIGHT, pitch);
         let yaw_quat = crate::Quaternion::from_axis_angle(Float3::UP, yaw);
-        let combined = quaternion_mul(yaw_quat, pitch_quat);
+        let combined = yaw_quat * pitch_quat;
         let direction = combined.mul_vec(Float3::BACK).normalize();
 
         let lateral_base = yaw_quat.mul_vec(Float3::RIGHT);
@@ -129,14 +135,5 @@ mod tests {
         let normal = direction.cross(lateral).normalize();
 
         Frame::new(direction, normal, lateral)
-    }
-
-    fn quaternion_mul(a: crate::Quaternion, b: crate::Quaternion) -> crate::Quaternion {
-        crate::Quaternion::new(
-            a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,
-            a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x,
-            a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w,
-            a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z,
-        )
     }
 }

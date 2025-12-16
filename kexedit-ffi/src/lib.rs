@@ -200,7 +200,7 @@ pub unsafe extern "C" fn kexedit_keyframe_evaluate(
 
 #[no_mangle]
 pub extern "C" fn kexedit_quat_mul(a: Quaternion, b: Quaternion) -> Quaternion {
-    a.mul(b)
+    a * b
 }
 
 #[no_mangle]

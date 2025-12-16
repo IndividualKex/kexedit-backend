@@ -65,10 +65,7 @@ pub fn evaluate(keyframes: &[Keyframe], t: f32, default_value: f32) -> f32 {
         return keyframes[0].value;
     }
 
-    let mut i = 0;
-    while i < keyframes.len() - 1 && t > keyframes[i + 1].time {
-        i += 1;
-    }
+    let i = keyframes.partition_point(|kf| kf.time <= t).saturating_sub(1);
 
     if i >= keyframes.len() - 1 {
         return keyframes[keyframes.len() - 1].value;

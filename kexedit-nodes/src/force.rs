@@ -41,7 +41,7 @@ fn step_by_forces(
         prev.normal,
         -lateral_accel / safe_velocity / sim::HZ,
     );
-    let combined = q_normal.mul(q_lateral);
+    let combined = q_normal * q_lateral;
 
     let new_direction = combined.mul_vec(prev.direction).normalize();
     let new_lateral = q_lateral.mul_vec(prev.lateral).normalize();

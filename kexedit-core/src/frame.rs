@@ -84,6 +84,12 @@ impl Frame {
     pub const DEFAULT: Self = Self::new(Float3::BACK, Float3::DOWN, Float3::RIGHT);
 }
 
+impl Default for Frame {
+    fn default() -> Self {
+        Self::DEFAULT
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

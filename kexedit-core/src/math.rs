@@ -74,6 +74,12 @@ impl Neg for Float3 {
     }
 }
 
+impl Default for Float3 {
+    fn default() -> Self {
+        Self::ZERO
+    }
+}
+
 /// Unit quaternion for 3D rotations.
 /// C-compatible layout for FFI.
 #[repr(C)]
@@ -108,13 +114,23 @@ impl Quaternion {
         v + (uv * (2.0 * self.w)) + (uuv * 2.0)
     }
 
-    pub fn mul(self, other: Self) -> Self {
+}
+
+impl Mul for Quaternion {
+    type Output = Self;
+    fn mul(self, other: Self) -> Self {
         Self::new(
             self.w * other.x + self.x * other.w + self.y * other.z - self.z * other.y,
             self.w * other.y - self.x * other.z + self.y * other.w + self.z * other.x,
             self.w * other.z + self.x * other.y - self.y * other.x + self.z * other.w,
             self.w * other.w - self.x * other.x - self.y * other.y - self.z * other.z,
         )
+    }
+}
+
+impl Default for Quaternion {
+    fn default() -> Self {
+        Self::IDENTITY
     }
 }
 
@@ -163,7 +179,7 @@ mod tests {
         let q_yaw = Quaternion::from_axis_angle(Float3::UP, PI / 4.0);
         let q_pitch = Quaternion::from_axis_angle(Float3::RIGHT, PI / 6.0);
 
-        let q_combined = q_yaw.mul(q_pitch);
+        let q_combined = q_yaw * q_pitch;
 
         let v = Float3::BACK;
         let result_combined = q_combined.mul_vec(v);

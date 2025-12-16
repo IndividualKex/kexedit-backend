@@ -36,6 +36,12 @@ impl Forces {
     pub const ZERO: Self = Self::new(0.0, 0.0);
 }
 
+impl Default for Forces {
+    fn default() -> Self {
+        Self::ONE_G
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
