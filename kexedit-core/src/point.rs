@@ -3,7 +3,7 @@ use crate::{sim, Float3, Frame};
 #[repr(C)]
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Point {
-    pub spine_position: Float3,
+    pub heart_position: Float3,
     pub direction: Float3,
     pub normal: Float3,
     pub lateral: Float3,
@@ -13,7 +13,7 @@ pub struct Point {
     pub lateral_force: f32,
     pub heart_arc: f32,
     pub spine_arc: f32,
-    pub spine_advance: f32,
+    pub heart_advance: f32,
     pub friction_origin: f32,
     pub roll_speed: f32,
     pub heart_offset: f32,
@@ -24,7 +24,7 @@ pub struct Point {
 impl Point {
     #[allow(clippy::too_many_arguments)]
     pub const fn new(
-        spine_position: Float3,
+        heart_position: Float3,
         direction: Float3,
         normal: Float3,
         lateral: Float3,
@@ -34,7 +34,7 @@ impl Point {
         lateral_force: f32,
         heart_arc: f32,
         spine_arc: f32,
-        spine_advance: f32,
+        heart_advance: f32,
         friction_origin: f32,
         roll_speed: f32,
         heart_offset: f32,
@@ -42,7 +42,7 @@ impl Point {
         resistance: f32,
     ) -> Self {
         Self {
-            spine_position,
+            heart_position,
             direction,
             normal,
             lateral,
@@ -52,7 +52,7 @@ impl Point {
             lateral_force,
             heart_arc,
             spine_arc,
-            spine_advance,
+            heart_advance,
             friction_origin,
             roll_speed,
             heart_offset,
@@ -69,12 +69,12 @@ impl Point {
         Frame::new(self.direction, self.normal, self.lateral)
     }
 
-    pub fn heart_position(&self, offset: f32) -> Float3 {
-        self.spine_position + self.normal * offset
+    pub fn spine_position(&self, offset: f32) -> Float3 {
+        self.heart_position + self.normal * offset
     }
 
     pub fn create(
-        spine_position: Float3,
+        heart_position: Float3,
         direction: Float3,
         roll: f32,
         velocity: f32,
@@ -83,11 +83,11 @@ impl Point {
         resistance: f32,
     ) -> Self {
         let frame = from_direction_and_roll(direction, roll);
-        let heart_pos = frame.heart_position(spine_position, heart_offset);
-        let energy = 0.5 * velocity * velocity + sim::G * heart_pos.y;
+        let spine_pos = frame.spine_position(heart_position, heart_offset);
+        let energy = 0.5 * velocity * velocity + sim::G * spine_pos.y;
 
         Self::new(
-            spine_position,
+            heart_position,
             frame.direction,
             frame.normal,
             frame.lateral,
@@ -127,7 +127,7 @@ impl Point {
 
     pub fn with_friction_origin(&self, new_origin: f32) -> Self {
         Self::new(
-            self.spine_position,
+            self.heart_position,
             self.direction,
             self.normal,
             self.lateral,
@@ -137,7 +137,7 @@ impl Point {
             self.lateral_force,
             self.heart_arc,
             self.spine_arc,
-            self.spine_advance,
+            self.heart_advance,
             new_origin,
             self.roll_speed,
             self.heart_offset,
@@ -153,7 +153,7 @@ impl Point {
         new_friction_origin: f32,
     ) -> Self {
         Self::new(
-            self.spine_position,
+            self.heart_position,
             self.direction,
             self.normal,
             self.lateral,
@@ -163,7 +163,7 @@ impl Point {
             self.lateral_force,
             self.heart_arc,
             self.spine_arc,
-            self.spine_advance,
+            self.heart_advance,
             new_friction_origin,
             self.roll_speed,
             self.heart_offset,
@@ -174,7 +174,7 @@ impl Point {
 
     pub fn with_forces(&self, new_normal_force: f32, new_lateral_force: f32) -> Self {
         Self::new(
-            self.spine_position,
+            self.heart_position,
             self.direction,
             self.normal,
             self.lateral,
@@ -184,7 +184,7 @@ impl Point {
             new_lateral_force,
             self.heart_arc,
             self.spine_arc,
-            self.spine_advance,
+            self.heart_advance,
             self.friction_origin,
             self.roll_speed,
             self.heart_offset,
@@ -205,12 +205,12 @@ impl Point {
         } else {
             self.friction_origin
         };
-        let center_y = self.heart_position(heart_offset * 0.9).y;
+        let center_y = self.spine_position(heart_offset * 0.9).y;
         let friction_distance = self.heart_arc - new_friction_origin;
         let new_energy = sim::compute_total_energy(new_velocity, center_y, friction_distance, friction);
 
         Self::new(
-            self.spine_position,
+            self.heart_position,
             self.direction,
             self.normal,
             self.lateral,
@@ -220,7 +220,7 @@ impl Point {
             self.lateral_force,
             self.heart_arc,
             self.spine_arc,
-            self.spine_advance,
+            self.heart_advance,
             new_friction_origin,
             self.roll_speed,
             self.heart_offset,
@@ -244,8 +244,8 @@ fn from_direction_and_roll(direction: Float3, roll: f32) -> Frame {
 }
 
 impl Frame {
-    pub fn heart_position(&self, spine_position: Float3, offset: f32) -> Float3 {
-        spine_position + self.normal * offset
+    pub fn spine_position(&self, heart_position: Float3, offset: f32) -> Float3 {
+        heart_position + self.normal * offset
     }
 }
 
@@ -259,21 +259,21 @@ mod tests {
     #[test]
     fn default_point_has_expected_values() {
         let point = Point::DEFAULT;
-        assert_relative_eq!(point.spine_position.y, 3.0, epsilon = TOLERANCE);
+        assert_relative_eq!(point.heart_position.y, 3.0, epsilon = TOLERANCE);
         assert_relative_eq!(point.velocity, 10.0, epsilon = TOLERANCE);
         assert_relative_eq!(point.heart_offset, 1.1, epsilon = TOLERANCE);
     }
 
     #[test]
     fn create_point_sets_energy_correctly() {
-        let spine_pos = Float3::new(0.0, 5.0, 0.0);
+        let heart_pos = Float3::new(0.0, 5.0, 0.0);
         let velocity = 15.0;
         let heart_offset = 1.0;
 
-        let point = Point::create(spine_pos, Float3::BACK, 0.0, velocity, heart_offset, 0.0, 0.0);
+        let point = Point::create(heart_pos, Float3::BACK, 0.0, velocity, heart_offset, 0.0, 0.0);
 
-        let expected_heart_y = spine_pos.y - heart_offset;
-        let expected_energy = 0.5 * velocity * velocity + sim::G * expected_heart_y;
+        let expected_spine_y = heart_pos.y - heart_offset;
+        let expected_energy = 0.5 * velocity * velocity + sim::G * expected_spine_y;
 
         assert_relative_eq!(point.energy, expected_energy, epsilon = TOLERANCE);
     }

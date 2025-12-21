@@ -249,9 +249,9 @@ fn step_geometric(
 ) -> Point {
     let prev_frame = prev.frame();
     let prev_direction = prev.direction;
-    let prev_spine_position = prev.spine_position;
+    let prev_heart_position = prev.heart_position;
 
-    let (curr_direction, curr_lateral, curr_normal, curr_spine_position) = if steering {
+    let (curr_direction, curr_lateral, curr_normal, curr_heart_position) = if steering {
         let mut unrolled_frame = prev_frame;
         if accumulated_roll.abs() > sim::EPSILON {
             unrolled_frame = prev_frame.with_roll(-*accumulated_roll);
@@ -271,7 +271,7 @@ fn step_geometric(
         let normal_unrolled = rotated.normal;
 
         let half_step_distance = prev.velocity / (2.0 * sim::HZ);
-        let curr_spine_position = prev_spine_position
+        let curr_heart_position = prev_heart_position
             + curr_direction * half_step_distance
             + prev_direction * half_step_distance;
 
@@ -285,36 +285,36 @@ fn step_geometric(
             (lateral_unrolled, normal_unrolled)
         };
 
-        (curr_direction, curr_lateral, curr_normal, curr_spine_position)
+        (curr_direction, curr_lateral, curr_normal, curr_heart_position)
     } else {
         let rotated = prev_frame.with_pitch(delta_pitch).with_yaw(delta_yaw);
         let curr_direction = rotated.direction;
         let mut curr_normal = rotated.normal;
 
         let half_step_distance = prev.velocity / (2.0 * sim::HZ);
-        let prev_heart_pos = prev.heart_position(heart_offset_val);
-        let curr_heart_pos_if_spine_static = prev_spine_position + curr_normal * heart_offset_val;
+        let prev_spine_pos = prev.spine_position(heart_offset_val);
+        let curr_spine_pos_if_heart_static = prev_heart_position + curr_normal * heart_offset_val;
 
-        let curr_spine_position = prev_spine_position
+        let curr_heart_position = prev_heart_position
             + curr_direction * half_step_distance
             + prev_direction * half_step_distance
-            + (prev_heart_pos - curr_heart_pos_if_spine_static);
+            + (prev_spine_pos - curr_spine_pos_if_heart_static);
 
         let rolled = rotated.with_roll(delta_roll);
         let curr_lateral = rolled.lateral;
         curr_normal = rolled.normal;
 
-        (curr_direction, curr_lateral, curr_normal, curr_spine_position)
+        (curr_direction, curr_lateral, curr_normal, curr_heart_position)
     };
 
-    let heart_advance = ((curr_spine_position + curr_normal * heart_offset_val)
-        - prev.heart_position(heart_offset_val)).magnitude();
-    let new_heart_arc = prev.heart_arc + heart_advance;
-    let spine_advance = (curr_spine_position - prev_spine_position).magnitude();
-    let new_spine_arc = prev.spine_arc + spine_advance;
+    let spine_advance = ((curr_heart_position + curr_normal * heart_offset_val)
+        - prev.spine_position(heart_offset_val)).magnitude();
+    let new_heart_arc = prev.heart_arc + spine_advance;
+    let heart_advance = (curr_heart_position - prev_heart_position).magnitude();
+    let new_spine_arc = prev.spine_arc + heart_advance;
 
     let (new_energy, new_velocity) = if !driven {
-        let center_y = (curr_spine_position + curr_normal * (0.9 * heart_offset_val)).y;
+        let center_y = (curr_heart_position + curr_normal * (0.9 * heart_offset_val)).y;
         let friction_distance = new_heart_arc - prev.friction_origin;
         sim::update_energy(
             prev.energy,
@@ -330,10 +330,10 @@ fn step_geometric(
 
     let curr_frame = Frame::new(curr_direction, curr_normal, curr_lateral);
     let curvature = Curvature::from_frames(curr_frame, prev_frame);
-    let forces = Forces::compute(curvature, curr_frame, new_velocity, spine_advance);
+    let forces = Forces::compute(curvature, curr_frame, new_velocity, heart_advance);
 
     Point::new(
-        curr_spine_position,
+        curr_heart_position,
         curr_direction,
         curr_normal,
         curr_lateral,
@@ -343,7 +343,7 @@ fn step_geometric(
         forces.lateral,
         new_heart_arc,
         new_spine_arc,
-        spine_advance,
+        heart_advance,
         prev.friction_origin,
         roll_speed_val,
         heart_offset_val,
@@ -453,7 +453,7 @@ mod tests {
             &mut accumulated_roll,
         );
 
-        assert_ne!(result.spine_position, anchor.spine_position);
+        assert_ne!(result.heart_position, anchor.heart_position);
     }
 
     #[test]
@@ -475,7 +475,7 @@ mod tests {
             &mut accumulated_roll,
         );
 
-        assert_ne!(result.spine_position, anchor.spine_position);
+        assert_ne!(result.heart_position, anchor.heart_position);
         assert!(accumulated_roll.abs() > 0.0);
     }
 

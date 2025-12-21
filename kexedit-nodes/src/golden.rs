@@ -236,6 +236,7 @@ impl GoldTrackData {
 }
 
 impl GoldPointData {
+    // Gold data uses legacy inverted naming: position = heart position, totalHeartLength = spine arc
     pub fn to_point(&self) -> Point {
         Point::new(
             Float3::new(self.position.x, self.position.y, self.position.z),

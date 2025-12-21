@@ -59,7 +59,7 @@ mod tests {
         let position = Float3::new(1.0, 2.0, 3.0);
         let result = build(position, 0.0, 0.0, 0.0, 10.0, 50.0, 1.1, 0.0, 0.0);
 
-        assert_eq!(result.spine_position, position);
+        assert_eq!(result.heart_position, position);
         assert_eq!(result.velocity, 10.0);
         assert_eq!(result.energy, 50.0);
     }

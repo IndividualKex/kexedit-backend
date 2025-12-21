@@ -2,7 +2,7 @@ use kexedit_core::Point;
 
 pub fn build(anchor: &Point) -> Point {
     Point::new(
-        anchor.spine_position,
+        anchor.heart_position,
         -anchor.direction,
         anchor.normal,
         -anchor.lateral,
@@ -12,7 +12,7 @@ pub fn build(anchor: &Point) -> Point {
         -anchor.lateral_force,
         anchor.heart_arc,
         anchor.spine_arc,
-        anchor.spine_advance,
+        anchor.heart_advance,
         anchor.friction_origin,
         anchor.roll_speed,
         anchor.heart_offset,
@@ -40,7 +40,7 @@ mod tests {
         let anchor = Point::DEFAULT;
         let result = build(&anchor);
 
-        assert_eq!(result.spine_position, anchor.spine_position);
+        assert_eq!(result.heart_position, anchor.heart_position);
         assert_eq!(result.velocity, anchor.velocity);
         assert_eq!(result.energy, anchor.energy);
     }

@@ -49,7 +49,7 @@ impl CopyPathNode {
         let path_basis = Matrix3::from_columns(path_start.lateral, path_start.normal, path_start.direction);
         let anchor_basis = Matrix3::from_columns(anchor.lateral, anchor.normal, anchor.direction);
         let rotation = anchor_basis.multiply(&path_basis.transpose());
-        let translation = anchor.spine_position - rotation.multiply_vector(path_start.spine_position);
+        let translation = anchor.heart_position - rotation.multiply_vector(path_start.heart_position);
 
         let mut distance = source_path[start_index].heart_arc;
         let end_distance = source_path[end_index].heart_arc;
@@ -61,10 +61,10 @@ impl CopyPathNode {
         let mut prev_friction = anchor_friction;
 
         if !driven && anchor.velocity < sim::MIN_VELOCITY && anchor.frame().pitch() < 0.0 {
-            let center_y = anchor.frame().heart_position(anchor.spine_position, prev_heart_offset * 0.9).y;
+            let center_y = anchor.frame().spine_position(anchor.heart_position, prev_heart_offset * 0.9).y;
             let energy = 0.5 * sim::MIN_VELOCITY * sim::MIN_VELOCITY + sim::G * center_y;
             state = Point::new(
-                anchor.spine_position,
+                anchor.heart_position,
                 anchor.direction,
                 anchor.normal,
                 anchor.lateral,
@@ -74,7 +74,7 @@ impl CopyPathNode {
                 anchor.lateral_force,
                 anchor.heart_arc,
                 anchor.spine_arc,
-                anchor.spine_advance,
+                anchor.heart_advance,
                 anchor.heart_arc,
                 0.0,
                 0.0,
@@ -119,12 +119,12 @@ impl CopyPathNode {
 
             let (mut position, mut direction, mut lateral, mut normal);
             if interp_t < 0.0 {
-                position = end_point.spine_position;
+                position = end_point.heart_position;
                 direction = end_point.direction;
                 lateral = end_point.lateral;
                 normal = end_point.normal;
             } else {
-                position = start_point.spine_position + (end_point.spine_position - start_point.spine_position) * interp_t;
+                position = start_point.heart_position + (end_point.heart_position - start_point.heart_position) * interp_t;
                 direction = (start_point.direction + (end_point.direction - start_point.direction) * interp_t).normalize();
                 lateral = (start_point.lateral + (end_point.lateral - start_point.lateral) * interp_t).normalize();
                 normal = (start_point.normal + (end_point.normal - start_point.normal) * interp_t).normalize();
@@ -136,22 +136,22 @@ impl CopyPathNode {
             normal = rotation.multiply_vector(normal);
 
             let curr_frame = Frame::new(direction, normal, lateral);
-            let curr_heart_pos = curr_frame.heart_position(position, heart_offset_val);
-            let prev_heart_pos = prev.frame().heart_position(prev.spine_position, prev_heart_offset);
-            let spine_advance = (curr_heart_pos - prev_heart_pos).magnitude();
-            let heart_advance = (position - prev.spine_position).magnitude();
+            let curr_spine_pos = curr_frame.spine_position(position, heart_offset_val);
+            let prev_spine_pos = prev.frame().spine_position(prev.heart_position, prev_heart_offset);
+            let spine_advance = (curr_spine_pos - prev_spine_pos).magnitude();
+            let heart_advance = (position - prev.heart_position).magnitude();
             let heart_arc = prev.heart_arc + spine_advance;
             let spine_arc = prev.spine_arc + heart_advance;
 
             distance += expected_advancement;
 
-            let center_y = curr_frame.heart_position(position, heart_offset_val * 0.9).y;
+            let center_y = curr_frame.spine_position(position, heart_offset_val * 0.9).y;
             let friction_distance = heart_arc - state.friction_origin;
 
             let (new_energy, new_velocity);
             if driven {
                 new_velocity = evaluate(driven_velocity, t, prev.velocity);
-                let prev_center_y = prev.frame().heart_position(prev.spine_position, prev_heart_offset * 0.9).y;
+                let prev_center_y = prev.frame().spine_position(prev.heart_position, prev_heart_offset * 0.9).y;
                 new_energy = 0.5 * new_velocity * new_velocity + sim::G * prev_center_y;
             } else {
                 (new_energy, new_velocity) = sim::update_energy(
@@ -391,7 +391,7 @@ mod tests {
         );
 
         assert!(result.len() > 1);
-        assert!((result[0].spine_position - anchor.spine_position).magnitude() < 0.01);
+        assert!((result[0].heart_position - anchor.heart_position).magnitude() < 0.01);
     }
 
     #[test]

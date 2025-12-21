@@ -64,11 +64,12 @@ pub fn assert_points_match_gold(actual: &[Point], expected: &[GoldPointData]) {
     }
 }
 
+// Gold data uses legacy inverted naming: position = heart position
 fn compute_drift(actual: &Point, expected: &GoldPointData) -> f32 {
     let mut max_drift = 0.0f32;
-    max_drift = max_drift.max((actual.spine_position.x - expected.position.x).abs());
-    max_drift = max_drift.max((actual.spine_position.y - expected.position.y).abs());
-    max_drift = max_drift.max((actual.spine_position.z - expected.position.z).abs());
+    max_drift = max_drift.max((actual.heart_position.x - expected.position.x).abs());
+    max_drift = max_drift.max((actual.heart_position.y - expected.position.y).abs());
+    max_drift = max_drift.max((actual.heart_position.z - expected.position.z).abs());
     max_drift = max_drift.max((actual.velocity - expected.velocity).abs());
     max_drift = max_drift.max((actual.energy - expected.energy).abs());
     max_drift
@@ -82,10 +83,10 @@ fn log_point_comparison(actual: &Point, expected: &GoldPointData, index: usize) 
         "    "
     };
 
-    let sp = actual.spine_position;
+    let hp = actual.heart_position;
     eprintln!(
         "{}[{}] Pos: ({:.6}, {:.6}, {:.6}) vs ({:.6}, {:.6}, {:.6})",
-        marker, index, sp.x, sp.y, sp.z, expected.position.x, expected.position.y, expected.position.z
+        marker, index, hp.x, hp.y, hp.z, expected.position.x, expected.position.y, expected.position.z
     );
     eprintln!(
         "{}[{}] Vel: {:.6} vs {:.6}, diff={:e}",
@@ -145,16 +146,17 @@ fn get_sample_indices(count: usize) -> Vec<usize> {
     indices
 }
 
+// Gold data uses legacy inverted naming: position = heart position
 fn assert_point_matches_gold(actual: &Point, expected: &GoldPointData, index: usize, tolerance: f32) {
-    let sp = actual.spine_position;
+    let hp = actual.heart_position;
     assert_float3(
-        sp.x,
-        sp.y,
-        sp.z,
+        hp.x,
+        hp.y,
+        hp.z,
         expected.position.x,
         expected.position.y,
         expected.position.z,
-        "SpinePosition",
+        "HeartPosition",
         index,
         tolerance,
     );

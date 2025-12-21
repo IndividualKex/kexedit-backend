@@ -9,7 +9,7 @@ fn step_by_forces(
     normal_force: f32,
     lateral_force: f32,
     velocity: f32,
-    spine_advance: f32,
+    heart_advance: f32,
 ) -> Frame {
     let force_vec = prev.normal * (-normal_force)
         + prev.lateral * (-lateral_force)
@@ -17,10 +17,10 @@ fn step_by_forces(
     let normal_accel = -force_vec.dot(prev.normal) * sim::G;
     let lateral_accel = -force_vec.dot(prev.lateral) * sim::G;
 
-    let estimated_velocity = if spine_advance.abs() < sim::EPSILON {
+    let estimated_velocity = if heart_advance.abs() < sim::EPSILON {
         velocity
     } else {
-        spine_advance * sim::HZ
+        heart_advance * sim::HZ
     };
     let estimated_velocity = if estimated_velocity.abs() < sim::EPSILON {
         sim::EPSILON
@@ -63,34 +63,34 @@ pub fn advance(
         target_normal_force,
         target_lateral_force,
         prev.velocity,
-        prev.spine_advance,
+        prev.heart_advance,
     );
 
     let curr_direction = new_frame.direction;
     let mut curr_normal = new_frame.normal;
 
     let half_step_distance = prev.velocity / (2.0 * sim::HZ);
-    let prev_heart_pos = prev.heart_position(physics.heart_offset);
-    let curr_heart_pos_if_spine_static = prev.spine_position + curr_normal * physics.heart_offset;
+    let prev_spine_pos = prev.spine_position(physics.heart_offset);
+    let curr_spine_pos_if_heart_static = prev.heart_position + curr_normal * physics.heart_offset;
 
     let displacement = curr_direction * half_step_distance
         + prev.direction * half_step_distance
-        + (prev_heart_pos - curr_heart_pos_if_spine_static);
-    let curr_spine_position = prev.spine_position + displacement;
+        + (prev_spine_pos - curr_spine_pos_if_heart_static);
+    let curr_heart_position = prev.heart_position + displacement;
 
     let rolled_frame = new_frame.with_roll(physics.delta_roll);
     let curr_lateral = rolled_frame.lateral;
     curr_normal = rolled_frame.normal;
 
-    let heart_advance = ((curr_spine_position + curr_normal * physics.heart_offset)
-        - prev.heart_position(physics.heart_offset))
+    let heart_advance = ((curr_heart_position + curr_normal * physics.heart_offset)
+        - prev.spine_position(physics.heart_offset))
     .magnitude();
     let new_heart_arc = prev.heart_arc + heart_advance;
-    let spine_advance = (curr_spine_position - prev.spine_position).magnitude();
+    let spine_advance = (curr_heart_position - prev.heart_position).magnitude();
     let new_spine_arc = prev.spine_arc + spine_advance;
 
     let (new_energy, new_velocity) = if !physics.driven {
-        let center_y = (curr_spine_position + curr_normal * (0.9 * physics.heart_offset)).y;
+        let center_y = (curr_heart_position + curr_normal * (0.9 * physics.heart_offset)).y;
         let friction_distance = new_heart_arc - prev.friction_origin;
         sim::update_energy(
             prev.energy,
@@ -109,7 +109,7 @@ pub fn advance(
     let forces = Forces::compute(curvature, curr_frame, new_velocity, spine_advance);
 
     Point::new(
-        curr_spine_position,
+        curr_heart_position,
         curr_direction,
         curr_normal,
         curr_lateral,
@@ -353,8 +353,8 @@ mod tests {
 
         let result = advance(&anchor, 1.0, 0.0, &physics, 0.0);
 
-        assert_ne!(result.spine_position, anchor.spine_position);
-        assert!(result.spine_advance > 0.0);
+        assert_ne!(result.heart_position, anchor.heart_position);
+        assert!(result.heart_advance > 0.0);
     }
 
     #[test]

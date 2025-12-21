@@ -160,29 +160,29 @@ fn step_curved(
     }
 
     let half_step_distance = prev.velocity / (2.0 * sim::HZ);
-    let prev_heart_pos = prev.spine_position + prev.normal * heart_offset_val;
-    let curr_heart_pos_if_spine_static = prev.spine_position + curr_normal * heart_offset_val;
+    let prev_spine_pos = prev.heart_position + prev.normal * heart_offset_val;
+    let curr_spine_pos_if_heart_static = prev.heart_position + curr_normal * heart_offset_val;
 
-    let curr_spine_position = prev.spine_position
+    let curr_heart_position = prev.heart_position
         + curr_direction * half_step_distance
         + prev.direction * half_step_distance
-        + (prev_heart_pos - curr_heart_pos_if_spine_static);
+        + (prev_spine_pos - curr_spine_pos_if_heart_static);
 
     let delta_roll = roll_speed_val / sim::HZ;
     let roll_quat = Quaternion::from_axis_angle(curr_direction, -delta_roll);
     curr_lateral = roll_quat.mul_vec(curr_lateral).normalize();
     curr_normal = curr_direction.cross(curr_lateral).normalize();
 
-    let heart_advance = (curr_spine_position + curr_normal * heart_offset_val - prev_heart_pos).magnitude();
-    let new_heart_arc = prev.heart_arc + heart_advance;
-    let spine_advance = (curr_spine_position - prev.spine_position).magnitude();
-    let new_spine_arc = prev.spine_arc + spine_advance;
+    let spine_advance = (curr_heart_position + curr_normal * heart_offset_val - prev_spine_pos).magnitude();
+    let new_heart_arc = prev.heart_arc + spine_advance;
+    let heart_advance = (curr_heart_position - prev.heart_position).magnitude();
+    let new_spine_arc = prev.spine_arc + heart_advance;
 
     let mut new_energy = prev.energy;
     let mut new_velocity = prev.velocity;
 
     if !driven {
-        let center_y = (curr_spine_position + curr_normal * (0.9 * heart_offset_val)).y;
+        let center_y = (curr_heart_position + curr_normal * (0.9 * heart_offset_val)).y;
         let friction_distance = new_heart_arc - prev.friction_origin;
         (new_energy, new_velocity) = sim::update_energy(
             prev.energy,
@@ -196,10 +196,10 @@ fn step_curved(
 
     let curr_frame = Frame::new(curr_direction, curr_normal, curr_lateral);
     let curvature = Curvature::from_frames(curr_frame, prev_frame);
-    let forces = Forces::compute(curvature, curr_frame, new_velocity, spine_advance);
+    let forces = Forces::compute(curvature, curr_frame, new_velocity, heart_advance);
 
     Point::new(
-        curr_spine_position,
+        curr_heart_position,
         curr_direction,
         curr_normal,
         curr_lateral,
@@ -209,7 +209,7 @@ fn step_curved(
         forces.lateral,
         new_heart_arc,
         new_spine_arc,
-        spine_advance,
+        heart_advance,
         prev.friction_origin,
         roll_speed_val,
         heart_offset_val,
@@ -262,7 +262,7 @@ mod tests {
         );
 
         assert!(result.len() > 1);
-        assert!((result[0].spine_position - anchor.spine_position).magnitude() < 0.01);
+        assert!((result[0].heart_position - anchor.heart_position).magnitude() < 0.01);
     }
 
     #[test]

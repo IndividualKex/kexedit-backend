@@ -9,7 +9,7 @@ pub fn build(path: &[Point]) -> Vec<Point> {
         .rev()
         .map(|p| {
             Point::new(
-                p.spine_position,
+                p.heart_position,
                 -p.direction,
                 p.normal,
                 -p.lateral,
@@ -19,7 +19,7 @@ pub fn build(path: &[Point]) -> Vec<Point> {
                 -p.lateral_force,
                 p.heart_arc,
                 p.spine_arc,
-                p.spine_advance,
+                p.heart_advance,
                 p.friction_origin,
                 p.roll_speed,
                 p.heart_offset,

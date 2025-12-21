@@ -25,7 +25,7 @@ impl BridgeNode {
         let mut result = Vec::new();
         result.push(*anchor);
 
-        let vector = target_anchor.spine_position - anchor.spine_position;
+        let vector = target_anchor.heart_position - anchor.heart_position;
         let length = vector.magnitude();
 
         if length < sim::EPSILON {
@@ -110,20 +110,20 @@ impl BridgeNode {
             }
 
             let curr_frame = Frame::new(direction, normal, lateral);
-            let curr_heart_pos = curr_frame.heart_position(position, heart_offset_val);
-            let prev_heart_pos = prev.frame().heart_position(prev.spine_position, prev_heart_offset);
-            let spine_advance = (curr_heart_pos - prev_heart_pos).magnitude();
-            let heart_advance = (position - prev.spine_position).magnitude();
+            let curr_spine_pos = curr_frame.spine_position(position, heart_offset_val);
+            let prev_spine_pos = prev.frame().spine_position(prev.heart_position, prev_heart_offset);
+            let spine_advance = (curr_spine_pos - prev_spine_pos).magnitude();
+            let heart_advance = (position - prev.heart_position).magnitude();
             let heart_arc = prev.heart_arc + spine_advance;
             let spine_arc = prev.spine_arc + heart_advance;
 
-            let center_y = curr_frame.heart_position(position, heart_offset_val * 0.9).y;
+            let center_y = curr_frame.spine_position(position, heart_offset_val * 0.9).y;
             let friction_distance = heart_arc - state.friction_origin;
 
             let (new_energy, new_velocity);
             if driven {
                 new_velocity = evaluate(driven_velocity, t, prev.velocity);
-                let prev_center_y = prev.frame().heart_position(prev.spine_position, prev_heart_offset * 0.9).y;
+                let prev_center_y = prev.frame().spine_position(prev.heart_position, prev_heart_offset * 0.9).y;
                 new_energy = 0.5 * new_velocity * new_velocity + sim::G * prev_center_y;
             } else {
                 (new_energy, new_velocity) = sim::update_energy(
@@ -187,10 +187,10 @@ fn create_bridge_path(
 ) -> Vec<PathPoint> {
     let path_points = (length * 2.0).max(10.0) as usize;
 
-    let p0 = source.spine_position;
-    let p1 = source.spine_position + source.direction * (length * out_weight);
-    let p2 = target.spine_position - target.direction * (length * in_weight);
-    let p3 = target.spine_position;
+    let p0 = source.heart_position;
+    let p1 = source.heart_position + source.direction * (length * out_weight);
+    let p2 = target.heart_position - target.direction * (length * in_weight);
+    let p3 = target.heart_position;
 
     let source_roll = source.frame().roll();
     let target_roll = target.frame().roll();
@@ -378,7 +378,7 @@ mod tests {
         );
 
         assert!(result.len() > 1);
-        assert!((result[0].spine_position - anchor.spine_position).magnitude() < 0.01);
+        assert!((result[0].heart_position - anchor.heart_position).magnitude() < 0.01);
     }
 
     #[test]
