@@ -82,16 +82,16 @@ pub fn advance(
     let curr_lateral = rolled_frame.lateral;
     curr_normal = rolled_frame.normal;
 
-    let heart_advance = ((curr_heart_position + curr_normal * physics.heart_offset)
+    let spine_advance = ((curr_heart_position + curr_normal * physics.heart_offset)
         - prev.spine_position(physics.heart_offset))
     .magnitude();
-    let new_heart_arc = prev.heart_arc + heart_advance;
-    let spine_advance = (curr_heart_position - prev.heart_position).magnitude();
     let new_spine_arc = prev.spine_arc + spine_advance;
+    let heart_advance = (curr_heart_position - prev.heart_position).magnitude();
+    let new_heart_arc = prev.heart_arc + heart_advance;
 
     let (new_energy, new_velocity) = if !physics.driven {
         let center_y = (curr_heart_position + curr_normal * (0.9 * physics.heart_offset)).y;
-        let friction_distance = new_heart_arc - prev.friction_origin;
+        let friction_distance = new_spine_arc - prev.friction_origin;
         sim::update_energy(
             prev.energy,
             prev.velocity,
@@ -171,7 +171,7 @@ pub fn build(
             build_distance_section(
                 config.duration,
                 driven,
-                anchor.heart_arc,
+                anchor.spine_arc,
                 roll_speed,
                 normal_force,
                 lateral_force,
@@ -265,7 +265,7 @@ fn build_time_section(
 fn build_distance_section(
     duration: f32,
     driven: bool,
-    anchor_heart_arc: f32,
+    anchor_spine_arc: f32,
     roll_speed: &[Keyframe],
     normal_force: &[Keyframe],
     lateral_force: &[Keyframe],
@@ -282,17 +282,17 @@ fn build_distance_section(
     let mut prev_heart_offset = anchor_heart;
     let mut prev_friction = anchor_friction;
 
-    let end_length = anchor_heart_arc + duration;
+    let end_length = anchor_spine_arc + duration;
     let mut iterations = 0;
 
-    while state.heart_arc < end_length {
+    while state.spine_arc < end_length {
         if iterations >= MAX_ITERATIONS {
             break;
         }
         iterations += 1;
 
         let prev = *state;
-        let d = prev.heart_arc - anchor_heart_arc + prev.velocity / sim::HZ;
+        let d = prev.spine_arc - anchor_spine_arc + prev.velocity / sim::HZ;
 
         let mut prev = prev;
         if driven {
