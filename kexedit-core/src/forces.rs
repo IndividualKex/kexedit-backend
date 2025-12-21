@@ -12,7 +12,7 @@ impl Forces {
         Self { normal, lateral }
     }
 
-    pub fn compute(curvature: Curvature, frame: Frame, velocity: f32, spine_advance: f32) -> Self {
+    pub fn compute(curvature: Curvature, frame: Frame, velocity: f32, heart_advance: f32) -> Self {
         if curvature.total_angle.abs() < sim::EPSILON {
             return Self::new(-Float3::UP.dot(frame.normal), -Float3::UP.dot(frame.lateral));
         }
@@ -27,7 +27,7 @@ impl Forces {
 
         let force_vec = Float3::UP
             + frame.lateral * (velocity * sim::HZ * lateral_angle / sim::G)
-            + frame.normal * (spine_advance * sim::HZ * sim::HZ * normal_angle / sim::G);
+            + frame.normal * (heart_advance * sim::HZ * sim::HZ * normal_angle / sim::G);
 
         Self::new(-force_vec.dot(frame.normal), -force_vec.dot(frame.lateral))
     }

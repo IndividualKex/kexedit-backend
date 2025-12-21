@@ -106,7 +106,7 @@ pub fn advance(
 
     let curr_frame = Frame::new(curr_direction, curr_normal, curr_lateral);
     let curvature = Curvature::from_frames(curr_frame, prev_frame);
-    let forces = Forces::compute(curvature, curr_frame, new_velocity, spine_advance);
+    let forces = Forces::compute(curvature, curr_frame, new_velocity, heart_advance);
 
     Point::new(
         curr_heart_position,
